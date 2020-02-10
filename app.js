@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const db = require('./config/db').mongoURI;
+const path = require('path');
+const cors = require('cors');
 const app = express();
 
 const image = require('./router/v1/image');
@@ -14,10 +16,12 @@ mongoose
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine','ejs');
 
+app.use(cors());
 // app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json());
-// app.use(express.static(path.join(__dirname,'public')));
+app.use(express.static(__dirname + "/public"));
+// app.use('/public', express.static('public'));
 
 app.use('/test/image',image);
 

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-cosnt ImageSchema = new Schema({
+const ImageSchema = new mongoose.Schema({
     imageNeme: {
         type: String,
         default: 'None',
@@ -12,4 +12,4 @@ cosnt ImageSchema = new Schema({
     }
 });
 
-modules.export = Image = mongoose.model('image', ImageSchema);
+module.exports = Image = mongoose.model('image', ImageSchema);
