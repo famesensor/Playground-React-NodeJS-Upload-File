@@ -5,70 +5,46 @@ import "./App.css";
 
 class App extends Component {
   constructor(props) {
-    super();
-
+    super(props);
     this.state = {
-      multerImage: DefaultImg,
-      firebaseImage: DefaultImg,
-      baseImage: DefaultImg,
-      photo: null
+      selectedFile: null
     };
-
-    this.onSubmit = this.onSubmit.bind(this);
-
   }
 
-  // setDefaultImage(uploadType) {
-  //   if (uploadType === "multer") {
-  //     this.setState({
-  //       multerImage: DefaultImg
-  //     });
-  //   }
-  // }
-
-  onChangePicture(e) {
-    this.setState({ 
-      [e.target.name]: e.target.files[0]
+  onChangeHandler = event => {
+    this.setState({
+      selectedFile: event.target.files[0],
+      loaded: 0
     });
-  }
+    console.log(event.target.files[0]);
+  };
 
-  onSubmit(e) {
-    e.preventDefault();
-
-    let imageObj = new FormData();
-    // imageObj.append('imageName', 'multer-image-'+Date.now());
-    imageObj.append("imageData", this.state.photo);
-
-    const config = {
-      headers: {
-        "content-type": "multipart/form-data"
-      }
-    };
-    axios.post("/test/image/uploadmulter", imageObj, config)
-      .then(data => {
-        if (data.data.success) {
-          alert("Say yes!!");
-        }
+  onClickHandler = () => {
+    const data = new FormData();
+    data.append("imageName", "1")
+    data.append("file", this.state.selectedFile);
+    axios
+      .post("http://localhost:8000/upload", data, {
+        // receive two    parameter endpoint url ,form data
       })
-      .catch(err => {
-        alert("Say no!!");
+      .then(res => {
+        // then print response status
+        console.log(res.statusText);
       });
-  }
+  };
 
   render() {
     return (
       <div className="container">
         <div className="row">
-          <form onSubmit={this.onSubmit}>
-            <div className="form-group">
-              <input type="file" name="photo" onChange={this.onChangePicture.bind(this)} />
-            </div>
-            <div className="form-group">
-              <button className="btn btn-primary" type="submit">
-                Upload
-              </button>
-            </div>
-          </form>
+          <input type="file" name="file" onChange={this.onChangeHandler} />
+          <button
+            type="button"
+            className="btn btn-success btn-block"
+            onClick={this.onClickHandler}
+          >
+            Upload
+          </button>
         </div>
       </div>
     );

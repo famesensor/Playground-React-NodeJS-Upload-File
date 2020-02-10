@@ -3,19 +3,22 @@ const router = express.Router();
 const multer = require('multer');
 
 const Image = require('../../models/image');
+const DIR = './public/';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './public/');
+        cb(null, DIR);
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + file.originalname);
     }
+    
 });
 
 const fileFilter = (req, file, cb) => {
     if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png'){
         cb(null, true);
+        console.log(storage)
     } else {
         cb(null, false);
     }
@@ -26,7 +29,7 @@ const upload = multer({
     fileFilter: fileFilter
 });
 
-router.post('/uploadmulter', upload.single('imageData'), (req, res, next) => {
+router.post('/uploadmulter', upload.single('photo'), (req, res, next) => {
     console.log(req.body);
     console.log(req.file);
     // const newImage = new Image({
