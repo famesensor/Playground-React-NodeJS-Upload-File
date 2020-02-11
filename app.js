@@ -3,47 +3,33 @@ var app = express();
 var multer = require("multer");
 var cors = require("cors");
 const mongoose = require("mongoose");
+const bodyParser = require('body-parser');
 const db = require('./config/db').mongoURI;
 const Image = require('./models/image');
 app.use(cors());
+
+const image = require('./router/v1/image');
 
 mongoose
     .connect(db)
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.log(err));
 
-var storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, "./public/image");
-  },
-  filename: function(req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  }
-});
+app.use(bodyParser.urlencoded({ extended: false}));
+app.use(bodyParser.json());
 
-var upload = multer({ storage: storage })
+// var storage = multer.diskStorage({
+//   destination: function(req, file, cb) {
+//     cb(null, "./public/image");
+//   },
+//   filename: function(req, file, cb) {
+//     cb(null, Date.now() + "-" + file.originalname);
+//   }
+// });
 
-app.post('/upload', upload.single('file'), (req, res) => {
-    const newImage = new Image({
-        imageNeme: req.body.imageNeme,
-        imageData: req.file.path 
-    })
+// var upload = multer({ storage: storage })
 
-    newImage.save()
-        .then((data) => {
-            res.status(200).send(req.file);
-        })
-        .catch((err) => {
-            console.log(err);
-        })
-});
-// app.post("/upload", function(req, res) {
-//   upload(req, res, function(err) {
-//     if (err instanceof multer.MulterError) {
-//       return res.status(500).json(err);
-//     } else if (err) {
-//       return res.status(500).json(err);
-//     }
+// app.post('/upload', upload.single('file'), (req, res) => {
 //     const newImage = new Image({
 //         imageNeme: req.body.imageNeme,
 //         imageData: req.file.path 
@@ -56,10 +42,12 @@ app.post('/upload', upload.single('file'), (req, res) => {
 //         .catch((err) => {
 //             console.log(err);
 //         })
-//     // return res.status(200).send(req.file);
-//   });
 // });
 
-app.listen(8000, function() {
-  console.log("App running on port 8000");
+app.use('/api/image', image);
+
+const portNumber = process.env.PORT || 5000
+
+app.listen(portNumber, function() {
+  console.log(`Server running on prot : ${portNumber}`);
 });

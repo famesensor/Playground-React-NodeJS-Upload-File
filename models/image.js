@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const ImageSchema = new Schema({
-    imageNeme: {
+    imageName: {
         type: String,
         default: 'None',
         required: true

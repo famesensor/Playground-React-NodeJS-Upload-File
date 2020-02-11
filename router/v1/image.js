@@ -3,50 +3,25 @@ const router = express.Router();
 const multer = require('multer');
 
 const Image = require('../../models/image');
-const DIR = './public/';
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, DIR);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + file.originalname);
-    }
-    
-});
+router.post('/uploadbase', (req, res) => {
+    // console.log(req.body)
+    const newImage = new Image({
+        imageName: req.body.imageName,
+        imageData: req.body.imageData
+    });
 
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png'){
-        cb(null, true);
-        console.log(storage)
-    } else {
-        cb(null, false);
-    }
-}
-
-const upload = multer({
-    storage: storage,
-    fileFilter: fileFilter
-});
-
-router.post('/uploadmulter', upload.single('photo'), (req, res, next) => {
-    console.log(req.body);
-    console.log(req.file);
-    // const newImage = new Image({
-    //     imageName: req.body.imageName,
-    //     imageData: req.file.path
-    // })
-
-    // newImage.save()
-    //     .then((result) => {
-    //         res.statusCode(200).json({
-    //             success: true,
-    //             document: result
-    //         })
-    //     })
-    //     .catch((err) => {
-    //         console.log(err);
-    //     })
+    newImage.save()
+        .then((res) => {
+            // console.log(res)
+            res.status(200).json({
+                success: true,
+                data: res
+            })
+        })
+        .catch((err) => {
+            console.log(err);
+        })
 });
 
 module.exports = router; 
