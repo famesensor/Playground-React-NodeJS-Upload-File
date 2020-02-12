@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import axios from "axios";
-import DefaultImg from "defaultimg";
 import "./App.css";
 import { storage } from "./firebase-config";
 
@@ -41,6 +40,12 @@ class App extends Component {
         firebaseImg: null
       })
     }
+  }
+
+  onChangeHandler = e => {
+    this.setState({
+      firebaseImg: URL.createObjectURL(e.target.files[0])
+    });
   }
 
   upload(e, type) {
@@ -96,8 +101,9 @@ class App extends Component {
           >
             Upload
           </button> */}
-          <input type="file" onChange={(e) => this.upload(e, "firebase") } />
+          <input type="file" onChange={ this.onChangeHandler } />
           <img src={ this.state.firebaseImg } />
+          <button onClick={ (e) => this.upload(e, "firebase") }>Upload</button>
         </div>
       </div>
     );
