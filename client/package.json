@@ -3,30 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@firebase/app": "^0.5.4",
-    "@firebase/storage": "^0.3.26",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.4.0",
-    "@testing-library/user-event": "^7.2.1",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "antd": "^4.15.3",
     "axios": "^0.21.1",
-    "bootstrap": "^4.4.1",
-    "defaultimg": "^1.0.1",
-    "firebase": "^7.8.1",
-    "google-map-react": "^1.1.5",
-    "jwt-decode": "^2.2.0",
-    "moment": "^2.24.0",
-    "react": "^16.12.0",
-    "react-bootstrap": "^1.0.0-beta.16",
-    "react-dom": "^16.12.0",
-    "react-redux": "^7.1.3",
-    "react-router-dom": "^5.1.2",
-    "react-scripts": "3.3.0",
-    "react-thunk": "^1.0.0",
-    "redux": "^4.0.5",
-    "redux-devtools-extension": "^2.13.8",
-    "redux-thunk": "^2.3.0",
-    "semantic-ui-react": "^0.88.2",
-    "simple-react-validator": "^1.4.4"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "reqwest": "^2.0.5",
+    "web-vitals": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -35,7 +21,10 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [
@@ -48,6 +37,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "http://localhost:5000"
+  }
 }
