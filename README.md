@@ -2,8 +2,8 @@
 
 🎓 : Project is test upload image/file to server and firebase clund storage
 
-1. Upload image/file to local-storage server -> multer
-2. Upload image/file to firestroage (progress...)
+- Upload image/file to local-storage server -> multer
+- Upload image/file to firestroage (progress...)
     - You must create file firebase-config.js in client/src
 
 ## Installation
