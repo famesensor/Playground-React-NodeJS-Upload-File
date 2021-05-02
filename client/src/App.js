@@ -2,11 +2,22 @@
 import React, { useState, useEffect } from 'react';
 import 'antd/dist/antd.css';
 import './App.css';
-import { Row, Col, Upload, Button, message, Divider, List } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import {
+    Row,
+    Col,
+    Upload,
+    Button,
+    message,
+    Divider,
+    List,
+    Typography
+} from 'antd';
+import { UploadOutlined, CloudUploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 function App() {
+    const { Title } = Typography;
+
     const [filelist, setFile] = useState([]);
     const [files, setFiles] = useState([]);
     const [upload, setUpload] = useState(false);
@@ -80,9 +91,18 @@ function App() {
     return (
         <>
             <div className='App'>
+                <Divider plain>
+                    {' '}
+                    <Title>
+                        <CloudUploadOutlined />
+                        React File Management
+                    </Title>
+                </Divider>
+
                 <div>
                     <Row gutter={16}>
                         <Col span={12}>
+                            <Title level={4}> Upload File(Many)</Title>
                             <Upload
                                 beforeUpload={beforeUpload}
                                 onRemove={onRemove}
@@ -128,6 +148,10 @@ function App() {
                             />
                         </Col>
                         <Col span={12}>
+                            <Title level={4}>
+                                {' '}
+                                Upload File To Cloud Firebase (in progess...)
+                            </Title>
                             <Button icon={<UploadOutlined />}>
                                 Click to Upload
                             </Button>
