@@ -1,28 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { upload } = require('../../utils/multer');
+const fs = require('fs');
 
 const Files = require('../../models/files');
 
-router.post('/uploadbase', async (req, res, next) => {
-    const newImage = new Image({
-        imageName: req.body.imageName,
-        imageData: req.body.imageData
-    });
-
-    try {
-        let res_ = await newImage.save();
-
-        res.status(200).json({
-            success: true,
-            data: res_
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: `Internal server error.`
-        });
-    }
+router.post('/check-api', async (req, res, next) => {
+    res.status(200).json({ status: true });
 });
 
 router
@@ -38,23 +22,74 @@ router
                 });
             });
         }
-        console.log(files);
 
-        Files.insertMany(files)
-            .then(function () {
-                console.log('Data inserted'); // Success
-            })
-            .catch(function (error) {
-                console.log(error); // Failure
-                return res
-                    .status(500)
-                    .json({ status: false, message: 'internal server error' });
+        try {
+            let resFile = await Files.insertMany(files);
+            console.log('Data inserted'); // Success
+
+            res.json({
+                success: true,
+                data: 'upload file success'
             });
-
-        res.json({
-            success: true,
-            data: 'upload file success'
-        });
+        } catch (error) {
+            console.log(error); // Failure
+            return res
+                .status(500)
+                .json({ status: false, message: 'internal server error' });
+        }
     });
+
+router.route('/').get(async (req, res, next) => {
+    try {
+        let files = await Files.find();
+
+        res.status(200).json({
+            status: true,
+            data: files
+        });
+    } catch (error) {
+        console.log(error); // Failure
+        return res
+            .status(500)
+            .json({ status: false, message: 'internal server error' });
+    }
+});
+
+router.route('/:id').patch(async (req, res, next) => {
+    try {
+        // get file path
+        let file = await Files.findById(req.params.id);
+
+        // remove file in storage
+        fs.unlinkSync(file.path);
+
+        // delete info in database
+        let resFile = await Files.deleteOne({ _id: req.params.id });
+
+        res.status(200).json({
+            status: true,
+            data: 'delete file message'
+        });
+    } catch (error) {
+        console.log(error); // Failure
+        return res
+            .status(500)
+            .json({ status: false, message: 'internal server error' });
+    }
+});
+
+router.route('/:id').get(async (req, res, next) => {
+    try {
+        // get file path
+        let file = await Files.findById(req.params.id);
+
+        res.download(`./${file.path}`);
+    } catch (error) {
+        console.log(error); // Failure
+        return res
+            .status(500)
+            .json({ status: false, message: 'internal server error' });
+    }
+});
 
 module.exports = router;
