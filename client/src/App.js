@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import React, { useState, useEffect } from 'react';
 import 'antd/dist/antd.css';
 import './App.css';
-import { Row, Col, Upload, Button, message } from 'antd';
+import { Row, Col, Upload, Button, message, Divider, List } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 function App() {
     const [filelist, setFile] = useState([]);
+    const [files, setFiles] = useState([]);
     const [upload, setUpload] = useState(false);
+
+    useEffect(() => {
+        featch();
+    }, []);
+
+    const featch = async () => {
+        try {
+            let resFiles = await axios.get('http://localhost:5000/api/files/');
+            console.log(resFiles.data);
+            setFiles(resFiles.data.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const beforeUpload = (file) => {
         setFile((filelist) => [...filelist, file]);
@@ -24,16 +40,33 @@ function App() {
         data.append('name', 'famesensor');
         try {
             let res = await axios.post(
-                'http://localhost:5000/api/image/upload-local-storage',
+                'http://localhost:5000/api/files/upload-local-storage',
                 data
             );
+
             message.success(res.data.data);
+            featch();
             setUpload(false);
             setFile([]);
         } catch (error) {
-            message.error(error);
+            console.log(error);
+            // message.error(error);
             setUpload(false);
             setFile([]);
+        }
+    };
+
+    const deleteFile = async (id) => {
+        try {
+            let res = await axios.patch(
+                `http://localhost:5000/api/files/${id}`
+            );
+
+            console.log(res);
+            message.success(res.data.data);
+            featch();
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -67,6 +100,32 @@ function App() {
                             >
                                 {upload ? 'Uploading' : 'Start Upload'}
                             </Button>
+                            <Divider orientation='left'>File List</Divider>
+                            <List
+                                size='large'
+                                bordered
+                                dataSource={files}
+                                renderItem={(item) => (
+                                    <List.Item
+                                        actions={[
+                                            // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                                            <a
+                                                onClick={() =>
+                                                    deleteFile(item._id)
+                                                }
+                                            >
+                                                Delete
+                                            </a>
+                                        ]}
+                                    >
+                                        <a
+                                            href={`http://localhost:5000/api/files/${item._id}`}
+                                        >
+                                            {item.imageName}
+                                        </a>
+                                    </List.Item>
+                                )}
+                            />
                         </Col>
                         <Col span={12}>
                             <Button icon={<UploadOutlined />}>
