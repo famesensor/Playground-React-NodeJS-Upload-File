@@ -5,20 +5,25 @@ const mongoose = require('mongoose');
 
 const db = require('./config/db').mongoURI;
 
-const image = require('./router/v1/image');
+const files = require('./router/v1/files');
 
 // connect to database...
-// mongoose
-//     .connect(db)
-//     .then(() => console.log('MongoDB Connected'))
-//     .catch((err) => console.log(err));
+mongoose
+    .connect(db, {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useFindAndModify: false,
+        useUnifiedTopology: true
+    })
+    .then(() => console.log('MongoDB Connected'))
+    .catch((err) => console.log(err));
 
 // middleware
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.use('/api/image', image);
+app.use('/api/files', files);
 
 const portNumber = process.env.PORT || 5000;
 
