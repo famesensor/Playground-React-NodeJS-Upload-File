@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { upload } = require('../../utils/multer');
 
-const Image = require('../../models/image');
+const Files = require('../../models/files');
 
 router.post('/uploadbase', async (req, res, next) => {
     const newImage = new Image({
@@ -28,6 +28,29 @@ router.post('/uploadbase', async (req, res, next) => {
 router
     .route('/upload-local-storage')
     .post(upload.array('files', 5), async (req, res, next) => {
+        // console.log(req.files);
+        const files = [];
+        if (req.files) {
+            req.files.forEach((item) => {
+                files.push({
+                    imageName: item.filename,
+                    path: item.path
+                });
+            });
+        }
+        console.log(files);
+
+        Files.insertMany(files)
+            .then(function () {
+                console.log('Data inserted'); // Success
+            })
+            .catch(function (error) {
+                console.log(error); // Failure
+                return res
+                    .status(500)
+                    .json({ status: false, message: 'internal server error' });
+            });
+
         res.json({
             success: true,
             data: 'upload file success'
