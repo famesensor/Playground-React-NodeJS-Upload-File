@@ -46,6 +46,25 @@ exports.deleteImage = (path) => {
     });
 };
 
+exports.downloadFile = (path) => {
+    return new Promise((resolve, reject) => {
+        if (!path) reject('No path image');
+
+        const pathImage = getPathImage(path);
+        path = pathImage.split('/')[1];
+        path = `./${path}`;
+        bucket
+            .file(pathImage)
+            .download({ destination: path })
+            .then((res) => {
+                resolve(path);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
+};
+
 const getPathImage = (path) => {
     let imagePath = path.replace(baseUrl, '');
     let indexOfEndPath = imagePath.indexOf('?');
