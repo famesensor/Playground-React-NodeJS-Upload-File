@@ -3,7 +3,8 @@ const router = express.Router();
 const { upload, uploadFile } = require('../../utils/multer');
 const {
     uploadFiletoStorage,
-    deleteImage
+    deleteImage,
+    downloadFile
 } = require('../../utils/upload/storage');
 const fs = require('fs');
 
@@ -23,7 +24,8 @@ router
             req.files.forEach((item) => {
                 files.push({
                     imageName: item.filename,
-                    path: item.path
+                    path: item.path,
+                    type: 'local'
                 });
             });
         }
@@ -46,7 +48,7 @@ router
 
 router.route('/').get(async (req, res, next) => {
     try {
-        let files = await Files.find();
+        let files = await Files.find({ type: 'local' });
 
         res.status(200).json({
             status: true,
@@ -60,14 +62,91 @@ router.route('/').get(async (req, res, next) => {
     }
 });
 
-// delete file in local storage...
+// upload file to cloud storage(fire storage)...
+router
+    .route('/upload-cloud-storage')
+    .post(uploadFile.array('files', 5), async (req, res, next) => {
+        if (!req.files) {
+            return res
+                .status(400)
+                .json({ status: false, message: 'files empty' });
+        }
+
+        try {
+            const files = [];
+            for (file of req.files) {
+                const url = await uploadFiletoStorage(file, 'files');
+                console.log(file);
+                files.push({
+                    imageName: file.originalname,
+                    path: url,
+                    type: 'cloud'
+                });
+            }
+            let resFile = await Files.insertMany(files);
+
+            res.json({
+                success: true,
+                data: 'upload file success'
+            });
+        } catch (error) {
+            console.log(error);
+            return res
+                .status(500)
+                .json({ status: false, message: 'internal server error' });
+        }
+    });
+
+router.route('/cloud').get(async (req, res, next) => {
+    try {
+        let files = await Files.find({ type: 'cloud' });
+
+        res.status(200).json({
+            status: true,
+            data: files
+        });
+    } catch (error) {
+        console.log(error); // Failure
+        return res
+            .status(500)
+            .json({ status: false, message: 'internal server error' });
+    }
+});
+
+router.route('/cloud/:id').patch(async (req, res, next) => {
+    try {
+        // get file path
+        let file = await Files.findById(req.params.id);
+
+        // remove file in storage
+        await deleteImage(file.path);
+        // delete info in database
+        let resFile = await Files.deleteOne({ _id: req.params.id });
+
+        res.status(200).json({
+            status: true,
+            data: 'delete file message'
+        });
+    } catch (error) {
+        console.log(error); // Failure
+        return res
+            .status(500)
+            .json({ status: false, message: 'internal server error' });
+    }
+});
+
+// delete file in  storage...
 router.route('/:id').patch(async (req, res, next) => {
     try {
         // get file path
         let file = await Files.findById(req.params.id);
 
         // remove file in storage
-        fs.unlinkSync(file.path);
+        if (file.type === 'local') {
+            fs.unlinkSync(file.path);
+        } else {
+            await deleteImage(file.path);
+        }
 
         // delete info in database
         let resFile = await Files.deleteOne({ _id: req.params.id });
@@ -90,7 +169,12 @@ router.route('/:id').get(async (req, res, next) => {
         // get file path
         let file = await Files.findById(req.params.id);
 
-        res.download(`./${file.path}`);
+        if (file.type === 'local') {
+            res.download(`./${file.path}`);
+        } else {
+            let path = await downloadFile(file.path);
+            res.download(`./${path}`);
+        }
     } catch (error) {
         console.log(error); // Failure
         return res
@@ -98,38 +182,4 @@ router.route('/:id').get(async (req, res, next) => {
             .json({ status: false, message: 'internal server error' });
     }
 });
-
-// upload file to cloud storage(fire storage)...
-router
-    .route('/upload-cloud-stoagre')
-    .post(uploadFile.array('files', 5), async (req, res, next) => {
-        if (!req.files) {
-            return res
-                .status(400)
-                .json({ status: false, message: 'files empty' });
-        }
-
-        try {
-            const files = [];
-            for (file of req.files) {
-                const url = await uploadFiletoStorage(file, 'files');
-                files.push({
-                    imageName: file.originalname,
-                    path: url
-                });
-            }
-            let resFile = await Files.insertMany(files);
-
-            res.json({
-                success: true,
-                data: 'upload file success'
-            });
-        } catch (error) {
-            console.log(error);
-            return res
-                .status(500)
-                .json({ status: false, message: 'internal server error' });
-        }
-    });
-
 module.exports = router;
