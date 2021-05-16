@@ -21,6 +21,9 @@ function App() {
     const [filelist, setFile] = useState([]);
     const [files, setFiles] = useState([]);
     const [upload, setUpload] = useState(false);
+    const [filelistStorage, setFileStorage] = useState([]);
+    const [filesStorage, setFilesStorage] = useState([]);
+    const [uploadStorage, setUploadStorage] = useState(false);
 
     useEffect(() => {
         featch();
@@ -28,9 +31,11 @@ function App() {
 
     const featch = async () => {
         try {
-            let resFiles = await axios.get('http://localhost:5000/api/files/');
-            console.log(resFiles.data);
+            let resFiles = axios.get('http://localhost:5000/api/files/');
+            let res = axios.get('http://localhost:5000/api/files/cloud/');
+            [resFiles, res] = await Promise.all([resFiles, res]);
             setFiles(resFiles.data.data);
+            setFilesStorage(res.data.data);
         } catch (error) {
             console.log(error);
         }
@@ -81,11 +86,49 @@ function App() {
         }
     };
 
+    const submitToCloudStorage = async (e) => {
+        setUploadStorage(true);
+
+        const data = new FormData();
+        filelistStorage.forEach((file) => {
+            data.append('files', file, file.name);
+        });
+
+        try {
+            let res = await axios.post(
+                'http://localhost:5000/api/files/upload-cloud-storage',
+                data
+            );
+
+            message.success(res.data.data);
+            featch();
+            setUploadStorage(false);
+            setFileStorage([]);
+        } catch (error) {
+            console.log(error);
+            // message.error(error);
+            setUploadStorage(false);
+            setFile([]);
+        }
+    };
+
     const onRemove = (file) => {
         const index = filelist.indexOf(file);
         const newFileList = filelist.slice();
         newFileList.splice(index, 1);
         setFile(newFileList);
+    };
+
+    const beforeUploadStorage = (file) => {
+        setFileStorage((filelistStorage) => [...filelistStorage, file]);
+        return false;
+    };
+
+    const onRemoveStorage = (file) => {
+        const index = filelistStorage.indexOf(file);
+        const newFileList = filelistStorage.slice();
+        newFileList.splice(index, 1);
+        setFileStorage(newFileList);
     };
 
     return (
@@ -148,13 +191,50 @@ function App() {
                             />
                         </Col>
                         <Col span={12}>
-                            <Title level={4}>
-                                {' '}
-                                Upload File To Cloud Firebase (in progess...)
-                            </Title>
-                            <Button icon={<UploadOutlined />}>
-                                Click to Upload
+                            <Title level={4}> Upload File(Many)</Title>
+                            <Upload
+                                beforeUpload={beforeUploadStorage}
+                                onRemove={onRemoveStorage}
+                                multiple
+                            >
+                                <Button icon={<UploadOutlined />}>
+                                    Upload File
+                                </Button>
+                            </Upload>
+                            <p></p>
+                            <Button
+                                onClick={submitToCloudStorage}
+                                disabled={filelistStorage.length === 0}
+                                loading={uploadStorage}
+                            >
+                                {uploadStorage ? 'Uploading' : 'Start Upload'}
                             </Button>
+                            <Divider orientation='left'>File List</Divider>
+                            <List
+                                size='large'
+                                bordered
+                                dataSource={filesStorage}
+                                renderItem={(item) => (
+                                    <List.Item
+                                        actions={[
+                                            // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                                            <a
+                                                onClick={() =>
+                                                    deleteFile(item._id)
+                                                }
+                                            >
+                                                Delete
+                                            </a>
+                                        ]}
+                                    >
+                                        <a
+                                            href={`http://localhost:5000/api/files/${item._id}`}
+                                        >
+                                            {item.imageName}
+                                        </a>
+                                    </List.Item>
+                                )}
+                            />
                         </Col>
                     </Row>
                 </div>
