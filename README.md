@@ -2,9 +2,10 @@
 
 🎓 : Project is test upload image/file to server and firebase clund storage
 
-- Upload image/file to local-storage server -> multer
-- Upload image/file to firestroage (progress...)
-    - You must create file firebase-config.js in client/src
+- Upload image/file to local-storage server
+- Upload image/file to firestroage 
+    - You must create fire storage
+    - You must generate file serviceAccount.json from firebase
 
 ## Installation
 ```
@@ -19,6 +20,6 @@
 
 # Back-end
 ./ : docker-compose up -d
-./ : npm start # developert model : npm run dev
+./ : npm start # developer model : npm run dev
 
 ```
