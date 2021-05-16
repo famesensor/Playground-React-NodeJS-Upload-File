@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { upload } = require('../../utils/multer');
+const { upload, uploadFile } = require('../../utils/multer');
+const {
+    uploadFiletoStorage,
+    deleteImage
+} = require('../../utils/upload/storage');
 const fs = require('fs');
 
 const Files = require('../../models/files');
@@ -9,6 +13,7 @@ router.post('/check-api', async (req, res, next) => {
     res.status(200).json({ status: true });
 });
 
+// upload file to local storage...
 router
     .route('/upload-local-storage')
     .post(upload.array('files', 5), async (req, res, next) => {
@@ -55,6 +60,7 @@ router.route('/').get(async (req, res, next) => {
     }
 });
 
+// delete file in local storage...
 router.route('/:id').patch(async (req, res, next) => {
     try {
         // get file path
@@ -78,6 +84,7 @@ router.route('/:id').patch(async (req, res, next) => {
     }
 });
 
+// download file from local storage...
 router.route('/:id').get(async (req, res, next) => {
     try {
         // get file path
@@ -91,5 +98,38 @@ router.route('/:id').get(async (req, res, next) => {
             .json({ status: false, message: 'internal server error' });
     }
 });
+
+// upload file to cloud storage(fire storage)...
+router
+    .route('/upload-cloud-stoagre')
+    .post(uploadFile.array('files', 5), async (req, res, next) => {
+        if (!req.files) {
+            return res
+                .status(400)
+                .json({ status: false, message: 'files empty' });
+        }
+
+        try {
+            const files = [];
+            for (file of req.files) {
+                const url = await uploadFiletoStorage(file, 'files');
+                files.push({
+                    imageName: file.originalname,
+                    path: url
+                });
+            }
+            let resFile = await Files.insertMany(files);
+
+            res.json({
+                success: true,
+                data: 'upload file success'
+            });
+        } catch (error) {
+            console.log(error);
+            return res
+                .status(500)
+                .json({ status: false, message: 'internal server error' });
+        }
+    });
 
 module.exports = router;
