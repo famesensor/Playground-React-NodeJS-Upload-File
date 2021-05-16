@@ -9,7 +9,10 @@
 
 ## Installation
 ```
+# Back-end
 ./ : npm install
+
+# Front-ned
 ./client : npm install   
 ```
 
