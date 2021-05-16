@@ -9,6 +9,10 @@ const FilesSchema = new Schema({
     path: {
         type: String,
         required: true
+    },
+    type: {
+        type: String,
+        default: 'local'
     }
 });
 
